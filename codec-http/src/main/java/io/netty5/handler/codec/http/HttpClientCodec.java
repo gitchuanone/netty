@@ -20,6 +20,7 @@ import io.netty5.channel.Channel;
 import io.netty5.channel.ChannelHandlerContext;
 import io.netty5.channel.ChannelPipeline;
 import io.netty5.channel.CombinedChannelDuplexHandler;
+import io.netty5.channel.internal.DelegatingChannelHandlerContext;
 import io.netty5.handler.codec.PrematureChannelClosureException;
 
 import java.util.ArrayDeque;
@@ -212,7 +213,7 @@ public final class HttpClientCodec extends CombinedChannelDuplexHandler<HttpResp
         @Override
         protected void handlerAdded0(ChannelHandlerContext ctx) {
             if (failOnMissingResponse) {
-                context = new io.netty5.channel.internal.DelegatingChannelHandlerContext(ctx) {
+                context = new DelegatingChannelHandlerContext(ctx) {
                    @Override
                    public ChannelHandlerContext fireChannelRead(Object msg) {
                        decrement(msg);

@@ -18,6 +18,7 @@ package io.netty5.handler.codec.http;
 import io.netty5.buffer.api.Buffer;
 import io.netty5.channel.ChannelHandlerContext;
 import io.netty5.channel.CombinedChannelDuplexHandler;
+import io.netty5.channel.internal.DelegatingChannelHandlerContext;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -123,7 +124,7 @@ public final class HttpServerCodec extends CombinedChannelDuplexHandler<HttpRequ
 
         @Override
         protected void handlerAdded0(final ChannelHandlerContext ctx) {
-            context = new io.netty5.channel.internal.DelegatingChannelHandlerContext(ctx) {
+            context = new DelegatingChannelHandlerContext(ctx) {
 
                 @Override
                 public ChannelHandlerContext fireChannelRead(Object msg) {
