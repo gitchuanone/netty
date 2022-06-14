@@ -398,6 +398,12 @@ public class CombinedChannelDuplexHandler<I extends ChannelHandler, O extends Ch
         }
 
         @Override
+        public ChannelHandlerContext fireChannelShutdown(ChannelShutdownDirection direction) {
+            ctx.fireChannelShutdown(direction);
+            return this;
+        }
+
+        @Override
         public ChannelHandlerContext fireExceptionCaught(Throwable cause) {
             ctx.fireExceptionCaught(cause);
             return this;
@@ -450,6 +456,11 @@ public class CombinedChannelDuplexHandler<I extends ChannelHandler, O extends Ch
         @Override
         public Future<Void> close() {
             return ctx.close();
+        }
+
+        @Override
+        public Future<Void> shutdown(ChannelShutdownDirection direction) {
+            return ctx.shutdown(direction);
         }
 
         @Override

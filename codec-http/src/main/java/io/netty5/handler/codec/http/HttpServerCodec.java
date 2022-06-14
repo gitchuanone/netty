@@ -123,7 +123,7 @@ public final class HttpServerCodec extends CombinedChannelDuplexHandler<HttpRequ
 
         @Override
         protected void handlerAdded0(final ChannelHandlerContext ctx) {
-            context = new DelegatingChannelHandlerContext(ctx) {
+            context = new io.netty5.channel.internal.DelegatingChannelHandlerContext(ctx) {
 
                 @Override
                 public ChannelHandlerContext fireChannelRead(Object msg) {

@@ -15,6 +15,7 @@
  */
 package io.netty5.handler.codec.http2;
 
+import io.netty5.channel.ChannelShutdownDirection;
 import io.netty5.util.Resource;
 import io.netty5.channel.Channel;
 import io.netty5.channel.ChannelConfig;
@@ -296,6 +297,12 @@ abstract class AbstractHttp2StreamChannel extends DefaultAttributeMap implements
     }
 
     @Override
+    public boolean isShutdown(ChannelShutdownDirection direction) {
+        // TODO: Is this good ?
+        return !isActive();
+    }
+
+    @Override
     public boolean isWritable() {
         return unwritable == 0;
     }
@@ -549,6 +556,12 @@ abstract class AbstractHttp2StreamChannel extends DefaultAttributeMap implements
             promise.setSuccess(null);
 
             fireChannelInactiveAndDeregister(newPromise(), wasActive);
+        }
+
+        @Override
+        public void shutdown(ChannelShutdownDirection direction, Promise<Void> promise) {
+            // TODO: Fix me
+            promise.setSuccess(null);
         }
 
         @Override

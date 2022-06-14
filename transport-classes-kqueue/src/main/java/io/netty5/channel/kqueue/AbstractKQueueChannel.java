@@ -18,6 +18,7 @@ package io.netty5.channel.kqueue;
 import io.netty5.buffer.api.Buffer;
 import io.netty5.buffer.api.BufferAllocator;
 import io.netty5.buffer.api.DefaultBufferAllocators;
+import io.netty5.channel.ChannelShutdownDirection;
 import io.netty5.util.Resource;
 import io.netty5.channel.AbstractChannel;
 import io.netty5.channel.Channel;
@@ -27,7 +28,6 @@ import io.netty5.channel.ChannelMetadata;
 import io.netty5.channel.ChannelOutboundBuffer;
 import io.netty5.channel.ConnectTimeoutException;
 import io.netty5.channel.EventLoop;
-import io.netty5.channel.socket.ChannelInputShutdownEvent;
 import io.netty5.channel.socket.ChannelInputShutdownReadComplete;
 import io.netty5.channel.socket.SocketChannelConfig;
 import io.netty5.channel.unix.FileDescriptor;
@@ -439,13 +439,13 @@ abstract class AbstractKQueueChannel extends AbstractChannel implements UnixChan
                     } catch (IOException ignored) {
                         // We attempted to shutdown and failed, which means the input has already effectively been
                         // shutdown.
-                        fireEventAndClose(ChannelInputShutdownEvent.INSTANCE);
+                        shutdown(ChannelShutdownDirection.Inbound, newPromise());
                         return;
                     } catch (NotYetConnectedException ignore) {
                         // We attempted to shutdown and failed, which means the input has already effectively been
                         // shutdown.
                     }
-                    pipeline().fireUserEventTriggered(ChannelInputShutdownEvent.INSTANCE);
+                    shutdown(ChannelShutdownDirection.Inbound, newPromise());
                 } else {
                     close(newPromise());
                 }

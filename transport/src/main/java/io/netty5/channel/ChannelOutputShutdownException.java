@@ -1,3 +1,5 @@
+
+
 /*
  * Copyright 2017 The Netty Project
  *
@@ -13,21 +15,21 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package io.netty5.channel.socket;
+package io.netty5.channel;
 
-import io.netty5.channel.ChannelHandler;
-import io.netty5.channel.ChannelHandlerContext;
-import io.netty5.util.internal.UnstableApi;
+import java.io.IOException;
 
 /**
- * Special event which will be fired and passed to the
- * {@link ChannelHandler#userEventTriggered(ChannelHandlerContext, Object)} methods once the output of
- * a {@link SocketChannel} was shutdown.
+ * Used to fail pending writes when a channel's output has been shutdown.
  */
-@UnstableApi
-public final class ChannelOutputShutdownEvent {
-    public static final ChannelOutputShutdownEvent INSTANCE = new ChannelOutputShutdownEvent();
+public final class ChannelOutputShutdownException extends IOException {
+    private static final long serialVersionUID = 6712549938359321378L;
 
-    private ChannelOutputShutdownEvent() {
+    public ChannelOutputShutdownException(String msg) {
+        super(msg);
+    }
+
+    public ChannelOutputShutdownException(String msg, Throwable cause) {
+        super(msg, cause);
     }
 }

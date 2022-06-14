@@ -15,6 +15,7 @@
  */
 package io.netty5.channel.embedded;
 
+import io.netty5.channel.ChannelShutdownDirection;
 import io.netty5.util.Resource;
 import io.netty5.channel.AbstractChannel;
 import io.netty5.channel.Channel;
@@ -829,6 +830,12 @@ public class EmbeddedChannel extends AbstractChannel {
             @Override
             public void close(Promise<Void> promise) {
                 EmbeddedUnsafe.this.close(promise);
+                mayRunPendingTasks();
+            }
+
+            @Override
+            public void shutdown(ChannelShutdownDirection direction, Promise<Void> promise) {
+                EmbeddedUnsafe.this.shutdown(direction, promise);
                 mayRunPendingTasks();
             }
 
