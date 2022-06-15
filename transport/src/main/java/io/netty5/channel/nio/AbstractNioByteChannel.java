@@ -28,7 +28,6 @@ import io.netty5.channel.EventLoop;
 import io.netty5.channel.FileRegion;
 import io.netty5.channel.RecvBufferAllocator;
 import io.netty5.channel.internal.ChannelUtils;
-import io.netty5.channel.socket.ChannelInputShutdownReadComplete;
 import io.netty5.channel.socket.SocketChannelConfig;
 import io.netty5.util.internal.StringUtil;
 
@@ -96,7 +95,6 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
                 }
             } else {
                 inputClosedSeenErrorOnRead = true;
-                pipeline.fireUserEventTriggered(ChannelInputShutdownReadComplete.INSTANCE);
             }
         }
 
@@ -155,7 +153,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
                     readPending = false;
                     pipeline.fireChannelRead(buffer);
                     buffer = null;
-                } while (allocHandle.continueReading());
+                } while (allocHandle.continueReading() && !isShutdown(ChannelShutdownDirection.Inbound));
 
                 allocHandle.readComplete();
                 pipeline.fireChannelReadComplete();

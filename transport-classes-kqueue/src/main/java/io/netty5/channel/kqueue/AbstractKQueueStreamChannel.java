@@ -376,13 +376,17 @@ public abstract class AbstractKQueueStreamChannel extends AbstractKQueueChannel 
     }
 
     @Override
-    protected final void doShutdownOutput() throws Exception {
-        socket.shutdown(false, true);
-    }
-
-    @Override
-    protected void doShutdownInput() throws Exception {
-        socket.shutdown(true, false);
+    protected void doShutdown(ChannelShutdownDirection direction) throws Exception {
+        switch (direction) {
+            case Outbound:
+                socket.shutdown(false, true);
+                break;
+            case Inbound:
+                socket.shutdown(true, false);
+                break;
+            default:
+                throw new IllegalStateException();
+        }
     }
 
     @Override
@@ -396,7 +400,7 @@ public abstract class AbstractKQueueStreamChannel extends AbstractKQueueChannel 
             case Inbound:
                 return socket.isInputShutdown();
             default:
-                return true;
+                throw new IllegalStateException();
         }
     }
 
@@ -457,7 +461,7 @@ public abstract class AbstractKQueueStreamChannel extends AbstractKQueueChannel 
                         //   was "wrapped" by this Channel implementation.
                         break;
                     }
-                } while (allocHandle.continueReading());
+                } while (allocHandle.continueReading() && !isShutdown(ChannelShutdownDirection.Inbound));
 
                 allocHandle.readComplete();
                 pipeline.fireChannelReadComplete();

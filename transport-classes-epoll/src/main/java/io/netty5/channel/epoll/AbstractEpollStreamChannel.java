@@ -394,13 +394,17 @@ public abstract class AbstractEpollStreamChannel extends AbstractEpollChannel im
     }
 
     @Override
-    protected final void doShutdownOutput() throws Exception {
-        socket.shutdown(false, true);
-    }
-
-    @Override
-    protected void doShutdownInput() throws Exception {
-        socket.shutdown(true, false);
+    protected void doShutdown(ChannelShutdownDirection direction) throws Exception {
+        switch (direction) {
+            case Outbound:
+                socket.shutdown(false, true);
+                break;
+            case Inbound:
+                socket.shutdown(true, false);
+                break;
+            default:
+                throw new IllegalStateException();
+        }
     }
 
     @Override
@@ -414,7 +418,7 @@ public abstract class AbstractEpollStreamChannel extends AbstractEpollChannel im
             case Inbound:
                 return socket.isInputShutdown();
             default:
-                return true;
+                throw new IllegalStateException();
         }
     }
 
@@ -503,7 +507,7 @@ public abstract class AbstractEpollStreamChannel extends AbstractEpollChannel im
                         //   was "wrapped" by this Channel implementation.
                         break;
                     }
-                } while (recvAlloc.continueReading());
+                } while (recvAlloc.continueReading() && !isShutdown(ChannelShutdownDirection.Inbound));
 
                 recvAlloc.readComplete();
                 pipeline.fireChannelReadComplete();

@@ -72,13 +72,13 @@ public abstract class AbstractServerChannel extends AbstractChannel implements S
     }
 
     @Override
-    protected void doShutdownOutput() {
+    protected void doShutdown(ChannelShutdownDirection direction) throws Exception {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    protected void doShutdownInput() {
-        throw new UnsupportedOperationException();
+    public boolean isShutdown(ChannelShutdownDirection direction) {
+        return !isActive();
     }
 
     @Override

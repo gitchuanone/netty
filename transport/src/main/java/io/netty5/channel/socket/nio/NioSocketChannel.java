@@ -138,7 +138,7 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
             case Inbound:
                 return javaChannel().socket().isInputShutdown();
             default:
-                return true;
+               throw new IllegalStateException();
         }
     }
 
@@ -153,13 +153,17 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
     }
 
     @Override
-    protected final void doShutdownOutput() throws Exception {
-        javaChannel().shutdownOutput();
-    }
-
-    @Override
-    protected final void doShutdownInput() throws Exception {
-        javaChannel().shutdownInput();
+    protected void doShutdown(ChannelShutdownDirection direction) throws Exception {
+        switch (direction) {
+            case Inbound:
+                javaChannel().shutdownInput();
+                break;
+            case Outbound:
+                javaChannel().shutdownOutput();
+                break;
+            default:
+                throw new IllegalStateException();
+        }
     }
 
     @Override

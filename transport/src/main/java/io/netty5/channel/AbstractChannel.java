@@ -293,12 +293,6 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         }
     }
 
-    @Override
-    public boolean isShutdown(ChannelShutdownDirection direction) {
-        // TODO: Is this the best thing to do ?
-        return !isActive();
-    }
-
     /**
      * {@link Unsafe} implementation which sub-classes must extend and use.
      */
@@ -477,7 +471,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             try {
                 // The shutdown function does not block regardless of the SO_LINGER setting on the socket
                 // so we don't need to use GlobalEventExecutor to execute the shutdown
-                doShutdownOutput();
+                doShutdown(ChannelShutdownDirection.Outbound);
                 promise.setSuccess(null);
             } catch (Throwable err) {
                 promise.setFailure(err);
@@ -575,7 +569,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 return;
             }
             if (!isActive()) {
-                promise.setFailure(new ClosedChannelException());
+                if (isOpen()) {
+                    promise.setFailure(new NotYetConnectedException());
+                } else {
+                    promise.setFailure(new ClosedChannelException());
+                }
                 return;
             }
             if (isShutdown(direction)) {
@@ -590,7 +588,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                     break;
                 case Inbound:
                     try {
-                        doShutdownInput();
+                        doShutdown(direction);
                         promise.setSuccess(null);
                         fireEvent = true;
                     } catch (Throwable cause) {
@@ -598,6 +596,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                     }
                     break;
                 default:
+                    // Should never happen
                     promise.setFailure(new IllegalStateException());
                     break;
             }
@@ -676,6 +675,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 return;
             }
 
+            if (isShutdown(ChannelShutdownDirection.Inbound)) {
+                // Input was shutdown so not try to read.
+                return;
+            }
             try {
                 doBeginRead();
             } catch (final Exception e) {
@@ -933,16 +936,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
      */
     protected abstract void doClose() throws Exception;
 
-    /**
-     * Called when conditions justify shutting down the output portion of the channel. This may happen if a write
-     * operation throws an exception.
-     */
-    protected void doShutdownOutput() throws Exception {
-        doClose();
-    }
-
-    protected void doShutdownInput() throws Exception {
-    }
+    protected abstract void doShutdown(ChannelShutdownDirection direction) throws Exception;
 
     /**
      * Deregister the {@link Channel} from its {@link EventLoop}.

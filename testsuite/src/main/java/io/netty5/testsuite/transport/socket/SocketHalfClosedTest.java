@@ -30,7 +30,6 @@ import io.netty5.channel.ChannelInitializer;
 import io.netty5.channel.ChannelOption;
 import io.netty5.channel.RecvBufferAllocator;
 import io.netty5.channel.SimpleChannelInboundHandler;
-import io.netty5.channel.socket.ChannelInputShutdownReadComplete;
 import io.netty5.util.UncheckedBooleanSupplier;
 import io.netty5.util.internal.PlatformDependent;
 import org.junit.jupiter.api.Test;
@@ -92,14 +91,8 @@ public class SocketHalfClosedTest extends AbstractSocketTest {
                           @Override
                           public void channelShutdown(ChannelHandlerContext ctx, ChannelShutdownDirection direction) {
                               if (direction == ChannelShutdownDirection.Inbound) {
-                                  ctx.writeAndFlush(ctx.bufferAllocator().copyOf(new byte[16]));
-                              }
-                          }
-
-                          @Override
-                          public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-                              if (ChannelInputShutdownReadComplete.INSTANCE == evt) {
-                                  ctx.close();
+                                  ctx.writeAndFlush(ctx.bufferAllocator().copyOf(new byte[16]))
+                                          .addListener(ctx, ChannelFutureListeners.CLOSE);
                               }
                           }
                       });
@@ -149,7 +142,6 @@ public class SocketHalfClosedTest extends AbstractSocketTest {
             });
 
             final AtomicInteger shutdownEventReceivedCounter = new AtomicInteger();
-            final AtomicInteger shutdownReadCompleteEventReceivedCounter = new AtomicInteger();
 
             cb.handler(new ChannelInitializer<>() {
                 @Override
@@ -160,15 +152,8 @@ public class SocketHalfClosedTest extends AbstractSocketTest {
                         public void channelShutdown(ChannelHandlerContext ctx, ChannelShutdownDirection direction) {
                            if (direction == ChannelShutdownDirection.Inbound) {
                                shutdownEventReceivedCounter.incrementAndGet();
+                               ctx.executor().schedule((Runnable) ctx::close, 100, MILLISECONDS);
                            }
-                        }
-
-                        @Override
-                        public void userEventTriggered(final ChannelHandlerContext ctx, Object evt) {
-                            if (evt == ChannelInputShutdownReadComplete.INSTANCE) {
-                                shutdownReadCompleteEventReceivedCounter.incrementAndGet();
-                                ctx.executor().schedule((Runnable) ctx::close, 100, MILLISECONDS);
-                            }
                         }
 
                         @Override
@@ -183,7 +168,6 @@ public class SocketHalfClosedTest extends AbstractSocketTest {
             Channel clientChannel = cb.connect(serverChannel.localAddress()).get();
             clientChannel.closeFuture().await();
             assertEquals(1, shutdownEventReceivedCounter.get());
-            assertEquals(1, shutdownReadCompleteEventReceivedCounter.get());
         } finally {
             if (serverChannel != null) {
                 serverChannel.close().sync();
@@ -254,14 +238,8 @@ public class SocketHalfClosedTest extends AbstractSocketTest {
                         public void channelShutdown(ChannelHandlerContext ctx, ChannelShutdownDirection direction) {
                              if (direction == ChannelShutdownDirection.Inbound) {
                                  clientHalfClosedLatch.countDown();
+                                 ctx.close();
                              }
-                        }
-
-                        @Override
-                        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-                            if (evt == ChannelInputShutdownReadComplete.INSTANCE) {
-                                ctx.close();
-                            }
                         }
 
                         @Override
@@ -560,12 +538,6 @@ public class SocketHalfClosedTest extends AbstractSocketTest {
                         public void channelShutdown(ChannelHandlerContext ctx, ChannelShutdownDirection direction) {
                             if (direction == ChannelShutdownDirection.Inbound && allowHalfClosed) {
                                 clientHalfClosedLatch.countDown();
-                            }
-                        }
-
-                        @Override
-                        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
-                            if (evt == ChannelInputShutdownReadComplete.INSTANCE) {
                                 ctx.close();
                             }
                         }

@@ -29,7 +29,6 @@ import io.netty5.channel.ChannelOutboundBuffer;
 import io.netty5.channel.ConnectTimeoutException;
 import io.netty5.channel.EventLoop;
 import io.netty5.channel.RecvBufferAllocator.Handle;
-import io.netty5.channel.socket.ChannelInputShutdownReadComplete;
 import io.netty5.channel.socket.SocketChannelConfig;
 import io.netty5.channel.unix.FileDescriptor;
 import io.netty5.channel.unix.IovArray;
@@ -480,7 +479,6 @@ abstract class AbstractEpollChannel extends AbstractChannel implements UnixChann
                 }
             } else if (!rdHup) {
                 inputClosedSeenErrorOnRead = true;
-                pipeline().fireUserEventTriggered(ChannelInputShutdownReadComplete.INSTANCE);
             }
         }
 

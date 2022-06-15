@@ -73,6 +73,8 @@ public class EmbeddedChannel extends AbstractChannel {
     private Queue<Object> outboundMessages;
     private Throwable lastException;
     private State state;
+    private boolean inputShutdown;
+    private boolean outputShutdown;
 
     /**
      * Create a new instance with an {@link EmbeddedChannelId} and an empty pipeline.
@@ -712,6 +714,35 @@ public class EmbeddedChannel extends AbstractChannel {
     @Override
     protected void doBind(SocketAddress localAddress) throws Exception {
         // NOOP
+    }
+
+    @Override
+    protected void doShutdown(ChannelShutdownDirection direction) {
+        switch (direction) {
+            case Inbound:
+                inputShutdown = true;
+                break;
+            case Outbound:
+                outputShutdown = true;
+                break;
+            default:
+                throw new IllegalStateException();
+        }
+    }
+
+    @Override
+    public boolean isShutdown(ChannelShutdownDirection direction) {
+        if (!isActive()) {
+            return true;
+        }
+        switch (direction) {
+            case Inbound:
+                return inputShutdown;
+            case Outbound:
+                return outputShutdown;
+            default:
+                throw new IllegalStateException();
+        }
     }
 
     @Override

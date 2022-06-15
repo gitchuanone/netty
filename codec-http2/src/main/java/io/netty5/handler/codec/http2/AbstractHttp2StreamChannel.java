@@ -418,7 +418,7 @@ abstract class AbstractHttp2StreamChannel extends DefaultAttributeMap implements
             // to the same EventLoop thread. There are a limited number of frame types that may come after EOS is
             // read (unknown, reset) and the trade off is less conditionals for the hot path (headers/data) at the
             // cost of additional readComplete notifications on the rare path.
-            if (allocHandle.continueReading()) {
+            if (allocHandle.continueReading() && !isShutdown(ChannelShutdownDirection.Inbound)) {
                 maybeAddChannelToReadCompletePendingQueue();
             } else {
                 unsafe.notifyReadComplete(allocHandle, true);

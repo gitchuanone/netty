@@ -28,7 +28,6 @@ import io.netty5.channel.ChannelMetadata;
 import io.netty5.channel.ChannelOutboundBuffer;
 import io.netty5.channel.ConnectTimeoutException;
 import io.netty5.channel.EventLoop;
-import io.netty5.channel.socket.ChannelInputShutdownReadComplete;
 import io.netty5.channel.socket.SocketChannelConfig;
 import io.netty5.channel.unix.FileDescriptor;
 import io.netty5.channel.unix.UnixChannel;
@@ -451,7 +450,6 @@ abstract class AbstractKQueueChannel extends AbstractChannel implements UnixChan
                 }
             } else if (!readEOF) {
                 inputClosedSeenErrorOnRead = true;
-                pipeline().fireUserEventTriggered(ChannelInputShutdownReadComplete.INSTANCE);
             }
         }
 
