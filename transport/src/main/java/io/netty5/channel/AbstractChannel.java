@@ -482,16 +482,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             } catch (Throwable err) {
                 promise.setFailure(err);
             } finally {
-                closeOutboundBufferForShutdown(pipeline, outboundBuffer, shutdownCause);
+                outboundBuffer.failFlushedAndClose(shutdownCause, false, shutdownCause, true);
             }
             return true;
-        }
-
-        private void closeOutboundBufferForShutdown(
-                ChannelPipeline pipeline, ChannelOutboundBuffer buffer, Throwable cause) {
-            buffer.failFlushed(cause, false);
-            buffer.close(cause, true);
-            pipeline.fireChannelShutdown(ChannelShutdownDirection.Outbound);
         }
 
         private void close(final Promise<Void> promise, final Throwable cause,
@@ -527,8 +520,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                         invokeLater(() -> {
                             if (outboundBuffer != null) {
                                 // Fail all the queued messages
-                                outboundBuffer.failFlushed(cause, notify);
-                                outboundBuffer.close(closeCause);
+                                outboundBuffer.failFlushedAndClose(cause, notify, closeCause, false);
                             }
                             fireChannelInactiveAndDeregister(wasActive);
                         });
@@ -541,8 +533,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 } finally {
                     if (outboundBuffer != null) {
                         // Fail all the queued messages.
-                        outboundBuffer.failFlushed(cause, notify);
-                        outboundBuffer.close(closeCause);
+                        outboundBuffer.failFlushedAndClose(cause, notify, closeCause, false);
                     }
                 }
                 if (inFlush0) {
