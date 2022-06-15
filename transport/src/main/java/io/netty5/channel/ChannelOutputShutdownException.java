@@ -17,13 +17,17 @@
  */
 package io.netty5.channel;
 
+import io.netty5.util.internal.ThrowableUtil;
+
 import java.io.IOException;
 
 /**
  * Used to fail pending writes when a channel's output has been shutdown.
  */
-public final class ChannelOutputShutdownException extends IOException {
+public class ChannelOutputShutdownException extends IOException {
     private static final long serialVersionUID = 6712549938359321378L;
+
+    public ChannelOutputShutdownException() { }
 
     public ChannelOutputShutdownException(String msg) {
         super(msg);
@@ -31,5 +35,17 @@ public final class ChannelOutputShutdownException extends IOException {
 
     public ChannelOutputShutdownException(String msg, Throwable cause) {
         super(msg, cause);
+    }
+
+    /**
+     * Creates a new {@link ChannelOutputShutdownException} which has the origin of the given {@link Class} and method.
+     */
+    static ChannelOutputShutdownException newInstance(Class<?> clazz, String method) {
+        return ThrowableUtil.unknownStackTrace(new ChannelOutputShutdownException() {
+            @Override
+            public Throwable fillInStackTrace() {
+                return this;
+            }
+        }, clazz, method);
     }
 }
