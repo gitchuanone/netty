@@ -194,6 +194,16 @@ public class CombinedChannelDuplexHandler<I extends ChannelHandler, O extends Ch
     }
 
     @Override
+    public void channelShutdown(ChannelHandlerContext ctx, ChannelShutdownDirection direction) throws Exception {
+        assert ctx == inboundCtx.ctx;
+        if (!inboundCtx.removed) {
+            inboundHandler.channelShutdown(inboundCtx, direction);
+        } else {
+            inboundCtx.fireChannelInactive();
+        }
+    }
+
+    @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         assert ctx == inboundCtx.ctx;
         if (!inboundCtx.removed) {
@@ -284,6 +294,16 @@ public class CombinedChannelDuplexHandler<I extends ChannelHandler, O extends Ch
             return outboundHandler.close(outboundCtx);
         } else {
             return outboundCtx.close();
+        }
+    }
+
+    @Override
+    public Future<Void> shutdown(ChannelHandlerContext ctx, ChannelShutdownDirection direction) {
+        assert ctx == outboundCtx.ctx;
+        if (!outboundCtx.removed) {
+            return outboundHandler.shutdown(outboundCtx, direction);
+        } else {
+            return outboundCtx.shutdown(direction);
         }
     }
 

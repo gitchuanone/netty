@@ -65,10 +65,6 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         super(parent, eventLoop, ch, SelectionKey.OP_READ);
     }
 
-    protected boolean isInputShutdown0() {
-        return false;
-    }
-
     @Override
     protected AbstractNioUnsafe newUnsafe() {
         return new NioByteUnsafe();
@@ -80,7 +76,8 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
     }
 
     final boolean shouldBreakReadReady(ChannelConfig config) {
-        return isInputShutdown0() && (inputClosedSeenErrorOnRead || !isAllowHalfClosure(config));
+        return isShutdown(ChannelShutdownDirection.Inbound) &&
+                (inputClosedSeenErrorOnRead || !isAllowHalfClosure(config));
     }
 
     private static boolean isAllowHalfClosure(ChannelConfig config) {
@@ -91,7 +88,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
     protected class NioByteUnsafe extends AbstractNioUnsafe {
 
         private void closeOnRead(ChannelPipeline pipeline) {
-            if (!isInputShutdown0()) {
+            if (!isShutdown(ChannelShutdownDirection.Inbound)) {
                 if (isAllowHalfClosure(config())) {
                     shutdown(ChannelShutdownDirection.Inbound, newPromise());
                 } else {

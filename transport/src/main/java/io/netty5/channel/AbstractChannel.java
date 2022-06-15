@@ -592,23 +592,26 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 promise.setSuccess(null);
                 return;
             }
+            boolean fireEvent = false;
             switch (direction) {
                 case Outbound:
-                    if (shutdownOutput(promise, null)) {
-                        pipeline().fireChannelShutdown(ChannelShutdownDirection.Outbound);
-                    }
+                    fireEvent = shutdownOutput(promise, null);
                     break;
                 case Inbound:
                     try {
                         doShutdownInput();
                         promise.setSuccess(null);
-                        pipeline().fireChannelShutdown(ChannelShutdownDirection.Inbound);
+                        fireEvent = true;
                     } catch (Throwable cause) {
                         promise.setFailure(cause);
                     }
                     break;
                 default:
                     promise.setFailure(new IllegalStateException());
+                    break;
+            }
+            if (fireEvent) {
+                pipeline().fireChannelShutdown(direction);
             }
         }
 

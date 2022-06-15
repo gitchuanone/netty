@@ -31,7 +31,6 @@ import io.netty5.channel.socket.ServerSocketChannel;
 import io.netty5.channel.socket.SocketChannelConfig;
 import io.netty5.util.concurrent.GlobalEventExecutor;
 import io.netty5.util.internal.SocketUtils;
-import io.netty5.util.internal.UnstableApi;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -153,20 +152,14 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         return (InetSocketAddress) super.remoteAddress();
     }
 
-    @UnstableApi
     @Override
     protected final void doShutdownOutput() throws Exception {
         javaChannel().shutdownOutput();
     }
 
     @Override
-    protected void doShutdownInput() throws Exception {
+    protected final void doShutdownInput() throws Exception {
         javaChannel().shutdownInput();
-    }
-
-    @Override
-    protected boolean isInputShutdown0() {
-        return isShutdown(ChannelShutdownDirection.Inbound);
     }
 
     @Override
