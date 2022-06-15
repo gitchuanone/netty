@@ -804,7 +804,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 close(newPromise(), t, newClosedChannelException(t, "flush0()"), false);
             } else {
                 try {
-                    shutdownOutput(newPromise(), t);
+                    if (shutdownOutput(newPromise(), t)) {
+                        pipeline().fireChannelShutdown(ChannelShutdownDirection.Outbound);
+                    }
                 } catch (Throwable t2) {
                     initialCloseCause = t;
                     close(newPromise(), t2, newClosedChannelException(t, "flush0()"), false);
