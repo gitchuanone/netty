@@ -38,7 +38,7 @@ public class NettyServer {
                     }
                 });
 
-        // 9. 启动服务端并绑定端口,同时将异步改为同步
+        // 9. 启动服务端并绑定端口,同时将异步改为同步。断点进入启动流程。
 //        ChannelFuture channelFuture = serverBootstrap.bind(9999).sync();
         // 由同步改为异步，获取回调的结果。
         ChannelFuture channelFuture = serverBootstrap.bind(9999);

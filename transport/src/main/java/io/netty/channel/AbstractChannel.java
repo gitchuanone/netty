@@ -480,9 +480,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 register0(promise);
             } else {
                 try {
+                    // 执行NioEventLoop，进入execute详细跟踪，重要。
                     eventLoop.execute(new Runnable() {
                         @Override
                         public void run() {
+                            // 注册通道，重要。
                             register0(promise);
                         }
                     });
@@ -505,12 +507,14 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                     return;
                 }
                 boolean firstRegistration = neverRegistered;
+                // 注册通道，重要。
                 doRegister();
                 neverRegistered = false;
                 registered = true;
 
                 // Ensure we call handlerAdded(...) before we actually notify the promise. This is needed as the
                 // user may already fire events through the pipeline in the ChannelFutureListener.
+                // 向pipeline中添加handler主要是针对initChannel方法中，重要。
                 pipeline.invokeHandlerAddedIfNeeded();
 
                 safeSetSuccess(promise);

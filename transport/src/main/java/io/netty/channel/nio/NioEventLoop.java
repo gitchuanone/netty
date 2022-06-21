@@ -495,9 +495,10 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 } else if (strategy > 0) {
                     final long ioStartTime = System.nanoTime();
                     try {
+                        // ===>处理SelectedKey。
                         processSelectedKeys();
                     } finally {
-                        // Ensure we always run tasks.
+                        // ===>Ensure we always run tasks.
                         final long ioTime = System.nanoTime() - ioStartTime;
                         ranTasks = runAllTasks(ioTime * (100 - ioRatio) / ioRatio);
                     }
