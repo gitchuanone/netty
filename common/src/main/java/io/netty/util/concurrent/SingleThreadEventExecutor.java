@@ -999,7 +999,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                 boolean success = false;
                 updateLastExecutionTime();
                 try {
-                    // 重要线程执行方法。
+                    // 重要线程执行方法。执行单线程事件执行器run方法。
                     SingleThreadEventExecutor.this.run();
                     success = true;
                 } catch (Throwable t) {

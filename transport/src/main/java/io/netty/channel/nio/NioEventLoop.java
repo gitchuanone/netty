@@ -495,7 +495,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 } else if (strategy > 0) {
                     final long ioStartTime = System.nanoTime();
                     try {
-                        // ===>处理SelectedKey。
+                        // ===>处理SelectedKey。消息入站进入口。
                         processSelectedKeys();
                     } finally {
                         // ===>Ensure we always run tasks.
@@ -722,6 +722,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             // Also check for readOps of 0 to workaround possible JDK bug which may otherwise lead
             // to a spin loop
             if ((readyOps & (SelectionKey.OP_READ | SelectionKey.OP_ACCEPT)) != 0 || readyOps == 0) {
+                // 读取数据。
                 unsafe.read();
             }
         } catch (CancelledKeyException ignored) {

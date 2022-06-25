@@ -606,6 +606,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     private void callHandlerAdded0(final AbstractChannelHandlerContext ctx) {
         try {
+            // 添加handler，进入。
             ctx.callHandlerAdded();
         } catch (Throwable t) {
             boolean removed = false;
@@ -916,6 +917,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
     @Override
     public final ChannelPipeline fireChannelRead(Object msg) {
+        // 通用通道读取读取方法，即处理器入站操作。
         AbstractChannelHandlerContext.invokeChannelRead(head, msg);
         return this;
     }
@@ -1407,6 +1409,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
+            // ===>发布通道读取。
             ctx.fireChannelRead(msg);
         }
 
@@ -1460,6 +1463,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         void execute() {
             EventExecutor executor = ctx.executor();
             if (executor.inEventLoop()) {
+                // 添加handler。
                 callHandlerAdded0(ctx);
             } else {
                 try {
