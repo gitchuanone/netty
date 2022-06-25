@@ -33,6 +33,8 @@ public class NettyServer {
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
+                        // 消息出站添加。
+                        ch.pipeline().addLast(new NettyServerOutHandler());
                         // 8. 向pipeline中添加自定义业务处理handler
                         ch.pipeline().addLast(new NettyServerChannelHandler());
                     }
